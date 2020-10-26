@@ -5,6 +5,7 @@ Main objective of this project to perform as ls command.My_ls command accepts on
 3. -t
 4. -s
 5. -i
+
 My_ls performs without options and with options upto two continous options like.
       
        ex) ./lscmd -ls   
