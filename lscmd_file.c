@@ -1,10 +1,10 @@
 #include"headersls.h"
-void lscmd(DIR *dp)
+void lscmd(struct filenames *fptr)
 {
-	struct dirent *var;
-	while((var=readdir(dp)))
+	while(fptr)
 	{
-		printf("%s ",var->d_name);
+		printf("%s ",fptr->f_name);
+		fptr=fptr->link;
 	}
 	printf("\n");
 	exit(0);
