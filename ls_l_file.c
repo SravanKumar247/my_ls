@@ -1,22 +1,20 @@
 #include"headersls.h"
 struct passwd *usrname;
 struct group *grpname;
-void ls_l(DIR *dp)
+void ls_l(struct filenames *fptr)
 {
       struct ls_l *ptr=NULL,*head=NULL,*prev=NULL,*cur=NULL;	
       struct dirent *var;
       struct stat buf;
-      while(var=readdir(dp))
+      while(fptr)
       { 
-	  if(!strcmp(var->d_name,".")||!strcmp(var->d_name,".."))
-	      continue;	  
           ptr=(struct ls_l *)calloc(1,sizeof(struct ls_l));
 	  if(ptr==NULL)
 	  {
 		  printf("node not created\n");
 		  exit(EXIT_FAILURE);
 	  }
-	  assign_values(ptr,var);
+	  assign_values_l(ptr,fptr);
 	  if(head==NULL||strcmp(head->file_name,ptr->file_name)>0)
 	  {
 		  ptr->link=head;
@@ -35,36 +33,49 @@ void ls_l(DIR *dp)
 		  ptr->link=prev->link;
 		  prev->link=ptr;
 	  }
+	
+	  fptr=fptr->link;
       }
       while(head!=NULL)
-      {
-	      print(head);
+      {	
+        if(a_flag==0&&head->file_name[0]=='.');
+	else
+	      print_l(head);
 	      head=head->link;
       }
 }
-void print(struct ls_l *ptr)
+void print_l(struct ls_l *ptr)
 {
+	if(i_flag==1)
+		printf("%lu ",ptr->ino_nbr);
+	if(s_flag==1)
+		printf("%u ",ptr->size_in_k);
+	if(l_flag==1)
+	{
 	printf("%-11s",ptr->modes);
 	printf(" %-3lu",ptr->nlinks);
 	printf("%-10s",ptr->grp_name);
 	printf("%-10s",ptr->usr_name);
 	printf(" %-7ld",ptr->size_bytes);
 	printf(" %-15s",ptr->time_zone);
+	}
 	printf(" %-20s\n",ptr->file_name);
 }
-void assign_values(struct ls_l *ptr,struct dirent *var)
+void assign_values_l(struct ls_l *ptr,struct filenames *fptr)
 {
 	struct stat buf;
-      if(stat(var->d_name,&buf)==-1) perror("stat");
+      if(stat(fptr->f_name,&buf)==-1) perror("stat");
       user_understandable_modes(buf.st_mode,ptr->modes);
       ptr->nlinks=buf.st_nlink;
       ptr->size_bytes=buf.st_size;
-      strcpy(ptr->file_name,var->d_name);
+      strcpy(ptr->file_name,fptr->f_name);
       calender(ptr->time_zone,buf.st_mtime);
       usrname=getpwuid(buf.st_uid);
       strcpy(ptr->usr_name,usrname->pw_name);
       grpname=getgrgid(buf.st_gid);
       strcpy(ptr->grp_name,grpname->gr_name);
+      ptr->ino_nbr=buf.st_ino;
+      ptr->size_in_k=(buf.st_blocks)/2;
 
 }
 void calender(char *arr,time_t t)
