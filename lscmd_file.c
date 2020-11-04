@@ -3,10 +3,11 @@ void lscmd(struct filenames *fptr)
 {
 	while(fptr)
 	{
-		printf("%s ",fptr->f_name);
+	  if(a_flag==0&&fptr->f_name[0]=='.');
+	  else
+              printf("%s\n",fptr->f_name);
 		fptr=fptr->link;
 	}
-	printf("\n");
 	exit(0);
 }
 	
